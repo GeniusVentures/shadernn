@@ -37,7 +37,9 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
     # set(SUPPORT_VULKAN 1)
     # add_definitions( -DSUPPORT_VULKAN )
 # endif()
+find_package(libjpeg-turbo REQUIRED)
 find_package(Vulkan REQUIRED)
+add_library(jpeg ALIAS libjpeg-turbo::jpeg)
 if (NOT DEFINED SUPPORT_GL AND NOT DEFINED SUPPORT_VULKAN)
     message(FATAL_ERROR "Neither OpenGL nor Vulkan is supported! Run config.sh script")
 endif()
@@ -184,8 +186,8 @@ if (DEFINED SUPPORT_VULKAN)
     set(WORK_GROUP_Y 8)
     set(WORK_GROUP_Z 4)
 
-    set(VK_COMPILE_OPTIONS "-DWG_X=${WORK_GROUP_X} -DWG_Y=${WORK_GROUP_Y} -DWG_Z=${WORK_GROUP_Z}")
-    set(VK_COMPILE_OPTIONS_FP16 "-DWG_X=${WORK_GROUP_X} -DWG_Y=${WORK_GROUP_Y} -DWG_Z=${WORK_GROUP_Z} -DFP16_PRECISION=1")
+    set(VK_COMPILE_OPTIONS -DWG_X=${WORK_GROUP_X} -DWG_Y=${WORK_GROUP_Y} -DWG_Z=${WORK_GROUP_Z})
+    set(VK_COMPILE_OPTIONS_FP16 -DWG_X=${WORK_GROUP_X} -DWG_Y=${WORK_GROUP_Y} -DWG_Z=${WORK_GROUP_Z} -DFP16_PRECISION=1)
 
 	# List of shader files to be compiled
 	set(SHADER_FILES
@@ -215,14 +217,16 @@ if (DEFINED SUPPORT_VULKAN)
 
 	# Remove existing SPIR-V files
 	file(GLOB SPIRV_FILES "${SHADER_DIR}/*.spv")
-	file(REMOVE ${SPIRV_FILES})
+	if(SPIRV_FILES)
+		file(REMOVE ${SPIRV_FILES})
+	endif()
 
 	# Compile shaders for normal precision
 	foreach(SHADER_FILE ${SHADER_FILES})
 		get_filename_component(SHADER_NAME_WE ${SHADER_FILE} NAME_WE)
 		add_custom_command(
 			OUTPUT ${SHADER_DIR}/${SHADER_NAME_WE}.spv
-			COMMAND ${CMAKE_COMMAND} -E echo "Compiling ${SHADER_NAME_WE}.comp to ${SHADER_NAME_WE}.spv"
+			COMMAND ${CMAKE_COMMAND} -E echo "Compiling ${SHADER_NAME_WE}.comp to ${SHADER_NAME_WE}.spv with options ${VK_COMPILE_OPTIONS}"
 			COMMAND glslc ${VK_COMPILE_OPTIONS} -o ${SHADER_DIR}/${SHADER_NAME_WE}.spv ${ROOT_SHADER_DIR}/${SHADER_FILE}
 			DEPENDS ${ROOT_SHADER_DIR}/${SHADER_FILE}
 		)
