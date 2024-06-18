@@ -105,7 +105,7 @@ void ImageTexture::reset(const std::array<uint32_t, 4>& dims, ColorFormat format
         p.width    = dims[0];
         p.height   = dims[1];
         p.depth    = dims[2];
-        p.channels = fd.ch * p.depth;
+        p.channels = (uint32_t) (fd.ch * p.depth);
         p.step     = 0;
         p.pitch    = 0;
         p.slice    = 0;
@@ -142,7 +142,7 @@ void ImageTexture::resetImages() {
         p.width  = _dims[0];
         p.height = _dims[1];
         p.depth  = _dims[2];
-        p.channels = getColorFormatDesc(_format).ch * p.depth;
+        p.channels = (uint32_t) (getColorFormatDesc(_format).ch * p.depth);
         p.step   = 0;
         p.pitch  = 0;
         p.slice  = 0;
@@ -182,7 +182,7 @@ bool ImageTexture::getCVMatData(uint8_t* ret) {
     float* tmpAddr = (float*) ret;
     SNN_LOGD("----format:%d planes:%d, width:%d, height:%d, depth:%d, textures: %zu----- \n", (int) _images.format(), _images.planes(), _images.width(),
              _images.height(), _images.depth(), getNumTextures());
-    uint32_t chs         = getColorFormatDesc(_images.format()).ch;
+    uint32_t chs         = (uint32_t) (getColorFormatDesc(_images.format()).ch);
     uint32_t planeSize   = (_images.width() * _images.height() * _images.depth()) * chs;
     uint32_t lineSize    = _images.width() * _images.depth() * chs;
     uint32_t channelSize = _images.depth() * chs;
@@ -209,7 +209,7 @@ bool ImageTexture::getCVMatData(uint8_t* ret) {
 void ImageTexture::prettyPrint(FILE* fp) {
     SNN_LOGD("----format:%d planes:%d, width:%d, height:%d, depth:%d, textures: %zu----- \n", (int) _images.format(), _images.planes(), _images.width(),
              _images.height(), _images.depth(), getNumTextures());
-    prettyPrintHWCBuf(at(0, 0, 0, 0), _dims[1], _dims[0], getColorFormatDesc(_format).ch * _dims[2], _format, fp);
+    prettyPrintHWCBuf(at(0, 0, 0, 0), _dims[1], _dims[0], (int) (getColorFormatDesc(_format).ch * _dims[2]), _format, fp);
 }
 
 std::shared_ptr<ImageTexture>* ImageTextureAllocator::allocate(size_t n) {

@@ -341,7 +341,7 @@ struct ImageDesc {
         pd.width          = (uint32_t) w;
         pd.height         = (uint32_t) h;
         pd.depth          = (uint32_t) d;
-        pd.channels       = channels;
+        pd.channels       = (uint32_t) channels;
         pd.step           = (uint32_t) step;
         pd.pitch          = (uint32_t) pitch;
         pd.slice          = (uint32_t) slice;
@@ -354,7 +354,7 @@ struct ImageDesc {
         pd.width          = (uint32_t) w;
         pd.height         = (uint32_t) h;
         pd.depth          = (uint32_t) d;
-        pd.channels       = getColorFormatDesc(f).ch * d;
+        pd.channels       = (uint32_t) (getColorFormatDesc(f).ch * d);
         reset(&pd, 1, alignment);
     }
 

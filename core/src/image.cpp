@@ -30,7 +30,7 @@ static std::vector<ImagePlaneDesc> convertPlanes(const RawImage& src, ColorForma
     std::vector<ImagePlaneDesc> planes = src.desc().planes;
     for (auto& p : planes) {
         p.format = format;
-        p.channels = p.depth * getColorFormatDesc(format).ch;
+        p.channels = (uint32_t) (p.depth * getColorFormatDesc(format).ch);
         p.step   = 0;
         p.pitch  = 0;
         p.slice  = 0;
@@ -158,7 +158,7 @@ void RawImage::saveToPNG(const std::string& filepath, size_t sliceIndex, bool ma
     if (step() != getColorFormatDesc(format()).bits) {
         SNN_RIP("does not support interleaved layout.");
     }
-    int channels = colorDesc.ch;
+    size_t channels = colorDesc.ch;
     switch (format()) {
     case ColorFormat::R8:
     case ColorFormat::RGB8:
@@ -210,7 +210,7 @@ void RawImage::saveToPNG(const std::string& filepath, size_t sliceIndex, bool ma
     default:
         SNN_RIP("unsupported color format: %s", colorDesc.name);
     }
-    stbi_write_png(filepath.c_str(), (int) width(), (int) height(), channels, slice(0, sliceIndex), pitch(0));
+    stbi_write_png(filepath.c_str(), (int) width(), (int) height(), (int) channels, slice(0, sliceIndex), pitch(0));
 }
 
 void RawImage::saveToBIN(const std::string& filepath, bool convertToFP32) const {

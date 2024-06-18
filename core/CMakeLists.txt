@@ -18,7 +18,10 @@ project(snn_core)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-message("OK")
+
+
+option(SUPPORT_VULKAN "Enable Vulkan support" OFF)
+option(SUPPORT_GL "Enable OpenGL support" OFF)
 # set(config_file "${CMAKE_CURRENT_SOURCE_DIR}/config.txt")
 # if(NOT EXISTS ${config_file})
     # message(FATAL_ERROR "${config_file} file not found. Run config.sh script")
@@ -52,25 +55,24 @@ endif()
 if (DEFINED ENV{SNN_DUMP_RESULTS_TXT})
     add_definitions( -DDUMP_RESULTS_TXT )
 endif()
-message("OK")
 
 # Check for filesystem support
 include(CheckCXXSourceCompiles)
-message("OK")
+
 check_cxx_source_compiles("
     #include <filesystem>
     int main() {
         std::filesystem::path p;
         return 0;
     }" HAVE_STD_FILESYSTEM)
-message("OK")
+
 check_cxx_source_compiles("
     #include <experimental/filesystem>
     int main() {
         std::experimental::filesystem::path p;
         return 0;
     }" HAVE_EXPERIMENTAL_FILESYSTEM)
-message("OK")
+
 find_package(Boost COMPONENTS filesystem system)
 if (Boost_FOUND)
     set(HAVE_BOOST_FILESYSTEM 1)
@@ -288,6 +290,14 @@ if (DEFINED SUPPORT_VULKAN)
 endif() # SUPPORT_VULKAN
 
 add_library(snn_core SHARED ${sources} ${public_headers} ${snn_3rdparty_sources})
+
+if (SUPPORT_VULKAN)
+    target_compile_definitions(snn_core PRIVATE SUPPORT_VULKAN)
+endif()
+
+if (SUPPORT_GL)
+    target_compile_definitions(snn_core PRIVATE SUPPORT_GL)
+endif()
 
 target_compile_options(snn_core PUBLIC 
     $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
