@@ -18,7 +18,7 @@ project(snn_core)
 set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
-
+message("OK")
 # set(config_file "${CMAKE_CURRENT_SOURCE_DIR}/config.txt")
 # if(NOT EXISTS ${config_file})
     # message(FATAL_ERROR "${config_file} file not found. Run config.sh script")
@@ -37,9 +37,11 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
     # set(SUPPORT_VULKAN 1)
     # add_definitions( -DSUPPORT_VULKAN )
 # endif()
-find_package(libjpeg-turbo REQUIRED)
+find_package(JPEG REQUIRED)
 find_package(Vulkan REQUIRED)
-add_library(jpeg ALIAS libjpeg-turbo::jpeg)
+include_directories(${Vulkan_INCLUDE_DIR} ${JPEG_INCLUDE_DIRS})
+message("INCLUDE DIRS ${Vulkan_INCLUDE_DIR} ${JPEG_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIR}")
+#add_library(jpeg ALIAS libjpeg-turbo::jpeg)
 if (NOT DEFINED SUPPORT_GL AND NOT DEFINED SUPPORT_VULKAN)
     message(FATAL_ERROR "Neither OpenGL nor Vulkan is supported! Run config.sh script")
 endif()
@@ -50,6 +52,40 @@ endif()
 if (DEFINED ENV{SNN_DUMP_RESULTS_TXT})
     add_definitions( -DDUMP_RESULTS_TXT )
 endif()
+message("OK")
+
+# Check for filesystem support
+include(CheckCXXSourceCompiles)
+message("OK")
+check_cxx_source_compiles("
+    #include <filesystem>
+    int main() {
+        std::filesystem::path p;
+        return 0;
+    }" HAVE_STD_FILESYSTEM)
+message("OK")
+check_cxx_source_compiles("
+    #include <experimental/filesystem>
+    int main() {
+        std::experimental::filesystem::path p;
+        return 0;
+    }" HAVE_EXPERIMENTAL_FILESYSTEM)
+message("OK")
+find_package(Boost COMPONENTS filesystem system)
+if (Boost_FOUND)
+    set(HAVE_BOOST_FILESYSTEM 1)
+endif()
+
+if (HAVE_STD_FILESYSTEM)
+    add_definitions(-DHAVE_STD_FILESYSTEM)
+elseif (HAVE_EXPERIMENTAL_FILESYSTEM)
+    add_definitions(-DHAVE_EXPERIMENTAL_FILESYSTEM)
+elseif (HAVE_BOOST_FILESYSTEM)
+    add_definitions(-DHAVE_BOOST_FILESYSTEM)
+#else
+   # message(FATAL_ERROR "No filesystem library found")
+endif()
+
 
 set(CMAKE_RUNTIME_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/bin)
 set(CMAKE_LIBRARY_OUTPUT_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/lib)
@@ -253,7 +289,10 @@ endif() # SUPPORT_VULKAN
 
 add_library(snn_core SHARED ${sources} ${public_headers} ${snn_3rdparty_sources})
 
-target_compile_options(snn_core PUBLIC  -fPIC -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-private-field -Wno-sign-compare)
+target_compile_options(snn_core PUBLIC 
+    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+    $<$<CXX_COMPILER_ID:GNU>:-fPIC -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-private-field -Wno-sign-compare>
+)
 # Eliminating picojson compile error
 set_source_files_properties(${root-dir}/core/src/ic2/modelparser.cpp PROPERTIES COMPILE_FLAGS "-Wno-uninitialized")
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -386,7 +425,7 @@ else()
     endif()
     cmrc_add_resource_library(snn-assets ALIAS snn::rc NAMESPACE snn ${assets})
     target_compile_options(snn-assets PRIVATE -fPIC)
-    
+    message("OPENCV INCLUDE DIRS ${OpenCV_INCLUDE_DIRS}")
     target_include_directories(snn_core PUBLIC ${OpenCV_INCLUDE_DIRS})
     target_link_libraries(snn_core PUBLIC snn-assets stdc++fs yuv jpeg)
 endif()

@@ -23,7 +23,7 @@
 #include <string>
 #include <cstring>
 #include <sstream>
-#include <filesystem>
+//#include <filesystem>
 #include <stdlib.h>
 #include <unordered_set>
 #include <iostream>
@@ -44,7 +44,7 @@
     #include <chrono>
     #include <cstdio>
     #include <cmrc/cmrc.hpp>
-    #include <experimental/filesystem>
+    #include <filesystem>
     CMRC_DECLARE(snn);
 #endif
 
@@ -53,18 +53,20 @@
 #endif
 
 #ifndef __has_include
-static_assert(false, "__has_include not supported");
+    static_assert(false, "__has_include not supported");
 #else
-    #if __cplusplus >= 201703L && __has_include(<filesystem>)
-        #include <filesystem>
-namespace fs = std::filesystem;
-    #elif __has_include(<experimental/filesystem>)
-        #include <experimental/filesystem>
-namespace fs = std::experimental::filesystem;
-    #elif __has_include(<boost/filesystem.hpp>)
-        #include <boost/filesystem.hpp>
-namespace fs = boost::filesystem;
-    #endif
+#if defined(HAVE_STD_FILESYSTEM)
+#include <filesystem>
+    namespace fs = std::filesystem;
+#elif defined(HAVE_EXPERIMENTAL_FILESYSTEM)
+#include <experimental/filesystem>
+    namespace fs = std::experimental::filesystem;
+#elif defined(HAVE_BOOST_FILESYSTEM)
+#include <boost/filesystem.hpp>
+    namespace fs = boost::filesystem;
+#else
+#error "No filesystem support"
+#endif
 #endif
 
 using namespace snn;
@@ -674,7 +676,7 @@ std::vector<uint8_t> snn::loadJsonFromStorage(const char* assetName) {
 #ifdef __ANDROID__
         std::string path = std::string(MODEL_DIR);
 #else
-        std::string path = std::experimental::filesystem::current_path();
+        std::string path = fs::current_path().string();
         path += ("/" + std::string(MODEL_DIR));
 #endif
         path += assetName;
