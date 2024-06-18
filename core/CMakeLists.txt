@@ -19,24 +19,24 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(config_file "${CMAKE_CURRENT_SOURCE_DIR}/config.txt")
-if(NOT EXISTS ${config_file})
-    message(FATAL_ERROR "${config_file} file not found. Run config.sh script")
-endif()
-file(STRINGS ${config_file} PLATFORMS)
-message(STATUS "Build for platforms: ${PLATFORMS}")
-string(FIND ${PLATFORMS} "GL" POS_GL)
-string(FIND ${PLATFORMS} "VULKAN" POS_VULKAN)
-if (${POS_GL} GREATER_EQUAL 0)
-    message(STATUS "Building with OpenGL support")
-    set(SUPPORT_GL 1)
-    add_definitions( -DSUPPORT_GL )
-endif()
-if (${POS_VULKAN} GREATER_EQUAL 0)
-    message(STATUS "Building with Vulkan support")
-    set(SUPPORT_VULKAN 1)
-    add_definitions( -DSUPPORT_VULKAN )
-endif()
+# set(config_file "${CMAKE_CURRENT_SOURCE_DIR}/config.txt")
+# if(NOT EXISTS ${config_file})
+    # message(FATAL_ERROR "${config_file} file not found. Run config.sh script")
+# endif()
+# file(STRINGS ${config_file} PLATFORMS)
+# message(STATUS "Build for platforms: ${PLATFORMS}")
+# string(FIND ${PLATFORMS} "GL" POS_GL)
+# string(FIND ${PLATFORMS} "VULKAN" POS_VULKAN)
+# if (${POS_GL} GREATER_EQUAL 0)
+    # message(STATUS "Building with OpenGL support")
+    # set(SUPPORT_GL 1)
+    # add_definitions( -DSUPPORT_GL )
+# endif()
+# if (${POS_VULKAN} GREATER_EQUAL 0)
+    # message(STATUS "Building with Vulkan support")
+    # set(SUPPORT_VULKAN 1)
+    # add_definitions( -DSUPPORT_VULKAN )
+# endif()
 if (NOT DEFINED SUPPORT_GL AND NOT DEFINED SUPPORT_VULKAN)
     message(FATAL_ERROR "Neither OpenGL nor Vulkan is supported! Run config.sh script")
 endif()
@@ -186,47 +186,63 @@ if (DEFINED SUPPORT_VULKAN)
     set(VK_COMPILE_OPTIONS "-DWG_X=${WORK_GROUP_X} -DWG_Y=${WORK_GROUP_Y} -DWG_Z=${WORK_GROUP_Z}")
     set(VK_COMPILE_OPTIONS_FP16 "-DWG_X=${WORK_GROUP_X} -DWG_Y=${WORK_GROUP_Y} -DWG_Z=${WORK_GROUP_Z} -DFP16_PRECISION=1")
 
-    execute_process (
-        COMMAND bash -c "rm -rf ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/*.spv"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_activation.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_activation.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_add.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_add.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_concat.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_concat.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_maxpool2d.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_maxpool2d.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_avgpool2d.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_avgpool2d.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_conv2d.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_conv2d.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_conv2d_1x1.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_conv2d_1x1.comp" 
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_batchnorm.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_batchnorm.comp"        
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_pad.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_pad.comp"        
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_flatten.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_flatten.comp" 
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_dense.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_dense.comp"            
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_instancenorm.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_instancenorm.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_depthwise.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_depthwise.comp"                
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_resize.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_resize.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_upsampling2d_bilinear.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_upsampling2d_bilinear.comp"  
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_upsampling2d_nearest.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_upsampling2d_nearest.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_subpixel.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_subpixel.comp"   
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_unary.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_unary.comp"   
-        # Compile for FP16
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_activation_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_activation.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_add_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_add.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_concat_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_concat.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_maxpool2d_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_maxpool2d.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_avgpool2d_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_avgpool2d.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_conv2d_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_conv2d.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_conv2d_1x1_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_conv2d_1x1.comp" 
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_batchnorm_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_batchnorm.comp"        
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_pad_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_pad.comp"        
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_flatten_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_flatten.comp" 
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_dense_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_dense.comp"            
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_instancenorm_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_instancenorm.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_depthwise_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_depthwise.comp"                
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_resize_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_resize.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_upsampling2d_bilinear_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_upsampling2d_bilinear.comp"  
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_upsampling2d_nearest_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_upsampling2d_nearest.comp"
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS_FP16} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_subpixel_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_subpixel.comp"       
-        COMMAND bash -c "glslc ${VK_COMPILE_OPTIONS} -o ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders/shadertemplate_vk_unary_fp16.spv ${root-dir}/core/data/assets/shaders/shadertemplate_vk_unary.comp"   
-        OUTPUT_VARIABLE outVar
-    )
+	# List of shader files to be compiled
+	set(SHADER_FILES
+		shadertemplate_vk_activation.comp
+		shadertemplate_vk_add.comp
+		shadertemplate_vk_concat.comp
+		shadertemplate_vk_maxpool2d.comp
+		shadertemplate_vk_avgpool2d.comp
+		shadertemplate_vk_conv2d.comp
+		shadertemplate_vk_conv2d_1x1.comp
+		shadertemplate_vk_batchnorm.comp
+		shadertemplate_vk_pad.comp
+		shadertemplate_vk_flatten.comp
+		shadertemplate_vk_dense.comp
+		shadertemplate_vk_instancenorm.comp
+		shadertemplate_vk_depthwise.comp
+		shadertemplate_vk_resize.comp
+		shadertemplate_vk_upsampling2d_bilinear.comp
+		shadertemplate_vk_upsampling2d_nearest.comp
+		shadertemplate_vk_subpixel.comp
+		shadertemplate_vk_unary.comp
+	)
+
+	# Directories
+	set(SHADER_DIR ${CMAKE_CURRENT_SOURCE_DIR}/data/assets/shaders)
+	set(ROOT_SHADER_DIR ${root-dir}/core/data/assets/shaders)
+
+	# Remove existing SPIR-V files
+	file(GLOB SPIRV_FILES "${SHADER_DIR}/*.spv")
+	file(REMOVE ${SPIRV_FILES})
+
+	# Compile shaders for normal precision
+	foreach(SHADER_FILE ${SHADER_FILES})
+		get_filename_component(SHADER_NAME_WE ${SHADER_FILE} NAME_WE)
+		add_custom_command(
+			OUTPUT ${SHADER_DIR}/${SHADER_NAME_WE}.spv
+			COMMAND ${CMAKE_COMMAND} -E echo "Compiling ${SHADER_NAME_WE}.comp to ${SHADER_NAME_WE}.spv"
+			COMMAND glslc ${VK_COMPILE_OPTIONS} -o ${SHADER_DIR}/${SHADER_NAME_WE}.spv ${ROOT_SHADER_DIR}/${SHADER_FILE}
+			DEPENDS ${ROOT_SHADER_DIR}/${SHADER_FILE}
+		)
+		list(APPEND SPIRV_TARGETS ${SHADER_DIR}/${SHADER_NAME_WE}.spv)
+	endforeach()
+
+	# Compile shaders for FP16 precision
+	foreach(SHADER_FILE ${SHADER_FILES})
+		get_filename_component(SHADER_NAME_WE ${SHADER_FILE} NAME_WE)
+		add_custom_command(
+			OUTPUT ${SHADER_DIR}/${SHADER_NAME_WE}_fp16.spv
+			COMMAND ${CMAKE_COMMAND} -E echo "Compiling ${SHADER_NAME_WE}.comp to ${SHADER_NAME_WE}_fp16.spv"
+			COMMAND glslc ${VK_COMPILE_OPTIONS_FP16} -o ${SHADER_DIR}/${SHADER_NAME_WE}_fp16.spv ${ROOT_SHADER_DIR}/${SHADER_FILE}
+			DEPENDS ${ROOT_SHADER_DIR}/${SHADER_FILE}
+		)
+		list(APPEND SPIRV_TARGETS ${SHADER_DIR}/${SHADER_NAME_WE}_fp16.spv)
+	endforeach()
+
+	# Add a custom target that depends on all shader compilation targets
+	add_custom_target(compile_shaders ALL DEPENDS ${SPIRV_TARGETS})
+
     message(STATUS, ${outVar})
 endif() # SUPPORT_VULKAN
 
