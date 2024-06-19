@@ -58,7 +58,7 @@ void VulkanImageTransformShaderOp::init(uvkc::vulkan::Device *device, const uint
         createSampler());
 
     // Using direct copy to buffer from memory
-    size_t paramsBufferSizeAlloc = std::max(16UL, _paramsBufferSize);
+    size_t paramsBufferSizeAlloc = std::max(static_cast<size_t>(16), _paramsBufferSize);
     BM_CHECK_OK_AND_ASSIGN(
         _paramsBuffer,
         _device->CreateBuffer(VK_BUFFER_USAGE_STORAGE_BUFFER_BIT,

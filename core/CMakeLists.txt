@@ -206,6 +206,7 @@ set(snn_3rdparty_headers
     3rdparty/eigen-3.4.0/
     3rdparty/picojson/include/
     3rdparty/stb_image/include/
+	3rdparty/glfw/include/
 )
 if (DEFINED SUPPORT_GL)
     set(snn_3rdparty_headers
@@ -300,11 +301,17 @@ if (SUPPORT_GL)
 endif()
 
 target_compile_options(snn_core PUBLIC 
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722>
+    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++20>
     $<$<CXX_COMPILER_ID:GNU>:-fPIC -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-private-field -Wno-sign-compare>
 )
 # Eliminating picojson compile error
-set_source_files_properties(${root-dir}/core/src/ic2/modelparser.cpp PROPERTIES COMPILE_FLAGS "-Wno-uninitialized")
+if (MSVC)
+    # Define the MSVC-specific flags
+    set_source_files_properties(${root-dir}/core/src/ic2/modelparser.cpp PROPERTIES COMPILE_FLAGS "/wd4701")
+else()
+    # Define the GCC/Clang-specific flags
+    set_source_files_properties(${root-dir}/core/src/ic2/modelparser.cpp PROPERTIES COMPILE_FLAGS "-Wno-uninitialized")
+endif()
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_options(snn_core PRIVATE -D_DEBUG -g)
     message(STATUS "cmake Build Type: Debug")
@@ -437,7 +444,12 @@ else()
     target_compile_options(snn-assets PRIVATE -fPIC)
     message("OPENCV INCLUDE DIRS ${OpenCV_INCLUDE_DIRS}")
     target_include_directories(snn_core PUBLIC ${OpenCV_INCLUDE_DIRS})
-    target_link_libraries(snn_core PUBLIC snn-assets stdc++fs yuv jpeg)
+    if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
+		target_link_libraries(snn_core PUBLIC stdc++fs)
+	endif()
+
+	# Continue linking other libraries
+	target_link_libraries(snn_core PUBLIC snn-assets yuv jpeg)
 endif()
 
 if (DEFINED SUPPORT_VULKAN)

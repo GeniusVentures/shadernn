@@ -242,7 +242,7 @@ ModelParser::ModelParser(const CreationParameters cp) {
         std::string subPath = name.substr(0, pos);
         std::string path = std::string(MODEL_DIR) + "/" + subPath + "/";
 #else
-        std::string path = std::experimental::filesystem::current_path();
+        std::string path = std::filesystem::current_path().string();
         size_t pos = name.find("/");
         std::string subPath = name.substr(0, pos);
         path += ("/" + std::string(MODEL_DIR) + "/" + subPath + "/");
