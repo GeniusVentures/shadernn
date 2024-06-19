@@ -44,6 +44,7 @@ find_package(JPEG REQUIRED)
 find_package(Vulkan REQUIRED)
 include_directories(${Vulkan_INCLUDE_DIR} ${JPEG_INCLUDE_DIRS})
 message("INCLUDE DIRS ${Vulkan_INCLUDE_DIR} ${JPEG_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIR}")
+message("JPEG ${JPEG_LIBRARY}")
 #add_library(jpeg ALIAS libjpeg-turbo::jpeg)
 if (NOT DEFINED SUPPORT_GL AND NOT DEFINED SUPPORT_VULKAN)
     message(FATAL_ERROR "Neither OpenGL nor Vulkan is supported! Run config.sh script")
@@ -449,7 +450,7 @@ else()
 	endif()
 
 	# Continue linking other libraries
-	target_link_libraries(snn_core PUBLIC snn-assets yuv jpeg)
+	target_link_libraries(snn_core PUBLIC snn-assets yuv ${JPEG_LIBRARY})
 endif()
 
 if (DEFINED SUPPORT_VULKAN)

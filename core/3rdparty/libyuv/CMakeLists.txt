@@ -35,11 +35,14 @@ ADD_EXECUTABLE			( yuvconvert ${ly_base_dir}/util/yuvconvert.cc )
 TARGET_LINK_LIBRARIES	( yuvconvert ${ly_lib_static} )
 
 
-INCLUDE ( FindJPEG )
+find_package(JPEG REQUIRED)
 if (JPEG_FOUND)
-  include_directories( ${JPEG_INCLUDE_DIR} )
-  target_link_libraries( yuvconvert ${JPEG_LIBRARY} )
-  add_definitions( -DHAVE_JPEG )
+    message("JPEG FOUND ${JPEG_INCLUDE_DIR} ${JPEG_LIBRARY}")
+    include_directories(${JPEG_INCLUDE_DIR})
+    target_link_libraries(yuvconvert ${JPEG_LIBRARY})
+	TARGET_LINK_LIBRARIES	( ${ly_lib_shared} ${ly_lib_static} ${JPEG_LIBRARY})
+	TARGET_LINK_LIBRARIES	( ${ly_lib_static} ${JPEG_LIBRARY})
+    add_definitions(-DHAVE_JPEG)
 endif()
 
 if(TEST)
@@ -87,7 +90,7 @@ endif()
 #INSTALL ( DIRECTORY ${PROJECT_SOURCE_DIR}/include/		DESTINATION include )
 
 # create the .deb and .rpm packages using cpack
-INCLUDE ( CM_linux_packages.cmake )
+#INCLUDE ( CM_linux_packages.cmake )
 
 # EXPORT
 set(${PROJECT_NAME}_STATIC_LIBS ${ly_lib_static}
@@ -103,12 +106,12 @@ set(${PROJECT_NAME}_INCLUDE_DIRS ${ly_inc_dir}
     CACHE INTERNAL "${PROJECT_NAME}: Include Directories" FORCE)
 
 add_library(libyuv-shared INTERFACE)
-target_include_directories(libyuv-shared INTERFACE ${ly_inc_dir})
+target_include_directories(libyuv-shared INTERFACE ${ly_inc_dir} ${JPEG_INCLUDE_DIR})
 target_link_libraries(libyuv-shared INTERFACE ${ly_lib_shared})
-if(JPEG_FOUND)
+if (JPEG_FOUND)
     target_link_libraries(libyuv-shared INTERFACE ${JPEG_LIBRARY})
 endif()
 
 add_library(libyuv-static INTERFACE)
-target_include_directories(libyuv-static INTERFACE ${ly_inc_dir})
-target_link_libraries(libyuv-static INTERFACE ${ly_lib_static})
+target_include_directories(libyuv-static INTERFACE ${ly_inc_dir} ${JPEG_INCLUDE_DIR})
+target_link_libraries(libyuv-static INTERFACE ${ly_lib_static} ${JPEG_LIBRARY})
