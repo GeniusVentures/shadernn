@@ -300,7 +300,7 @@ if (SUPPORT_GL)
 endif()
 
 target_compile_options(snn_core PUBLIC 
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX>
+    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722>
     $<$<CXX_COMPILER_ID:GNU>:-fPIC -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-private-field -Wno-sign-compare>
 )
 # Eliminating picojson compile error

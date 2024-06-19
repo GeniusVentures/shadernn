@@ -35,12 +35,18 @@ struct UpSampling2DDesc : CommonLayerDesc {
 
 class UpSampling2DLayer : public ShaderLayer {
 public:
-    UpSampling2DLayer(UpSampling2DDesc&& d): ShaderLayer(d), _desc(std::move(d)) {}
+    UpSampling2DLayer(UpSampling2DDesc&& d) : ShaderLayer(d), _desc(std::move(d)) {}
     virtual ~UpSampling2DLayer() = default;
+
     virtual InferenceGraph::Transform getOutputScaleDimAdjustment() const override {
-        return {0, {{ static_cast<float>(_desc.scale), static_cast<float>(_desc.scale), 0.0f, 0.0f}}
-    };
-}
+        InferenceGraph::Transform t;
+        t.isFixed = 0;
+        t.scaleWidth = static_cast<float>(_desc.scale);
+        t.scaleHeight = static_cast<float>(_desc.scale);
+        t.translateWidth = 0.0f;
+        t.translateHeight = 0.0f;
+        return t;
+    }
 
 protected:
     UpSampling2DDesc _desc;

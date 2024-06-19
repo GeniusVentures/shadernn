@@ -42,7 +42,13 @@ public:
     virtual ~BatchNormalizationLayer() = default;
 
     virtual InferenceGraph::Transform getOutputScaleDimAdjustment() const override {
-        return {0, {{1.0f, 1.0f, 0.0f, 0.0f}} };
+        InferenceGraph::Transform t;
+        t.isFixed = 0;
+        t.scaleWidth = 1.0f;
+        t.scaleHeight = 1.0f;
+        t.translateWidth = 0.0f;
+        t.translateHeight = 0.0f;
+        return t;
     }
 
 protected:

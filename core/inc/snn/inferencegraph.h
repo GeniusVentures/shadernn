@@ -64,8 +64,17 @@ struct InferenceGraph {
             };
         };
 
-        static constexpr Transform identity() { return {0, {{1.0f, 1.0f, 0.0f, 0.0f}}}; }
+        static constexpr Transform identity() {
+            Transform t;
+            t.isFixed = 0;
+            t.scaleWidth = 1.0f;
+            t.scaleHeight = 1.0f;
+            t.translateWidth = 0.0f;
+            t.translateHeight = 0.0f;
+            return t;
+        }
     };
+
 
     // This structure declares one layer of the inference processing graph at high level.
     struct Layer {

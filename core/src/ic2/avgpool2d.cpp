@@ -26,7 +26,14 @@ InferenceGraph::Transform AveragePooling2DLayer::getOutputScaleDimAdjustment() c
     } else {
         translation = 1.0f - 1.0f / (float)_desc.stride;
     }
-    return {0, {{scale, scale, translation, translation}} };
+    InferenceGraph::Transform t;
+    t.isFixed = 0;
+    t.scaleWidth = scale;
+    t.scaleHeight = scale;
+    t.translateWidth = translation;
+    t.translateHeight = translation;
+    return t;
+    //return {0, {{scale, scale, translation, translation}} };
 }
 
 void AveragePooling2DLayer::getPaddingOffsetOrig(uint32_t (&offsets)[4], const std::string& paddingT, const std::string& paddingB, const std::string& paddingL,

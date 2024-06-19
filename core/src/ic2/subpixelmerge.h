@@ -39,7 +39,14 @@ public:
     SubpixelLayer(SubpixelDesc&& d): ShaderLayer(d), _desc(std::move(d)) {}
     virtual ~SubpixelLayer() = default;
     virtual InferenceGraph::Transform getOutputScaleDimAdjustment() const override {
-        return {0, {{ static_cast<float>(_desc.kernelSize), static_cast<float>(_desc.kernelSize), 0.0f, 0.0f}} };
+        InferenceGraph::Transform t;
+        t.isFixed = 0;
+        t.scaleWidth = static_cast<float>(_desc.kernelSize);
+        t.scaleHeight = static_cast<float>(_desc.kernelSize);
+        t.translateWidth = 0.0f;
+        t.translateHeight = 0.0f;
+        return t;
+        //return {0, {{ static_cast<float>(_desc.kernelSize), static_cast<float>(_desc.kernelSize), 0.0f, 0.0f}} };
     }
 
 protected:

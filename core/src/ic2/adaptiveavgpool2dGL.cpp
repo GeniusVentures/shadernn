@@ -38,7 +38,14 @@ InferenceGraph::Transform AdaptiveAvgPool2dLayerGl::getOutputScaleDimAdjustment(
     } else {
         translation = 1.0f - 1.0f / static_cast<float>(_desc.stride);
     }
-    return {0, {{scale, scale, translation, translation}} };
+    InferenceGraph::Transform t;
+    t.isFixed = 0;
+    t.scaleWidth = scale;
+    t.scaleHeight = scale;
+    t.translateWidth = translation;
+    t.translateHeight = translation;
+    return t;
+    //return {0, {{scale, scale, translation, translation}} };
 }
 
 void AdaptiveAvgPool2dLayerGl::buildPreDefine(std::ostringstream& stream, const GenericModelLayer::LayerGenOptions& options,

@@ -63,7 +63,13 @@ void GenericModelLayer::run(snn::dp::DeviceBackend *, bool dumpOutputs) {
 
 void GenericModelLayer::getOutputDims(uint32_t& width, uint32_t& height, uint32_t& depth) const {
     width = height = depth = 0U;
-    InferenceGraph::Transform accumulatedTransform = {0, {{0.0f, 0.0f, 0.0f, 0.0f}}};
+    //InferenceGraph::Transform accumulatedTransform = {0, {{0.0f, 0.0f, 0.0f, 0.0f}}};
+    InferenceGraph::Transform accumulatedTransform;
+    accumulatedTransform.isFixed = 0;
+    accumulatedTransform.scaleWidth = 0.0f;
+    accumulatedTransform.scaleHeight = 0.0f;
+    accumulatedTransform.translateWidth = 0.0f;
+    accumulatedTransform.translateHeight = 0.0f;
     auto t                                         = getOutputScaleDimAdjustment();
     for (auto& dim : inputDims) {
         SNN_LOGV("dim:%d, %d, %d", dim.width, dim.height, dim.depth);

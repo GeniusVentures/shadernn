@@ -63,5 +63,12 @@ InferenceGraph::Transform PadLayer::getOutputScaleDimAdjustment() const {
     float translation1 = 0.0f, translation2 = 0.0f;
     translation1 = static_cast<float>(offset[2] + offset[3]);
     translation2 = static_cast<float>(offset[0] + offset[1]);
-    return {0, {{scale, scale, translation1, translation2}} };
+    InferenceGraph::Transform t;
+    t.isFixed = 0;
+    t.scaleWidth = scale;
+    t.scaleHeight = scale;
+    t.translateWidth = translation1;
+    t.translateHeight = translation2;
+    return t;
+    //return {0, {{scale, scale, translation1, translation2}} };
 }
