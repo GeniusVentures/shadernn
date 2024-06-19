@@ -43,8 +43,6 @@ option(SUPPORT_GL "Enable OpenGL support" OFF)
 find_package(JPEG REQUIRED)
 find_package(Vulkan REQUIRED)
 include_directories(${Vulkan_INCLUDE_DIR} ${JPEG_INCLUDE_DIRS})
-message("INCLUDE DIRS ${Vulkan_INCLUDE_DIR} ${JPEG_INCLUDE_DIRS} ${OpenCV_INCLUDE_DIR}")
-message("JPEG ${JPEG_LIBRARY}")
 #add_library(jpeg ALIAS libjpeg-turbo::jpeg)
 if (NOT DEFINED SUPPORT_GL AND NOT DEFINED SUPPORT_VULKAN)
     message(FATAL_ERROR "Neither OpenGL nor Vulkan is supported! Run config.sh script")
@@ -443,18 +441,18 @@ else()
     endif()
     cmrc_add_resource_library(snn-assets ALIAS snn::rc NAMESPACE snn ${assets})
     target_compile_options(snn-assets PRIVATE -fPIC)
-    message("OPENCV INCLUDE DIRS ${OpenCV_INCLUDE_DIRS}")
     target_include_directories(snn_core PUBLIC ${OpenCV_INCLUDE_DIRS})
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 		target_link_libraries(snn_core PUBLIC stdc++fs)
 	endif()
-
+	message("OPENCV LIBS ${OpenCV_LIBS}")
 	# Continue linking other libraries
-	target_link_libraries(snn_core PUBLIC snn-assets yuv ${JPEG_LIBRARY})
+	target_link_libraries(snn_core PUBLIC snn-assets yuv ${JPEG_LIBRARY} ${OpenCV_LIBS})
 endif()
 
 if (DEFINED SUPPORT_VULKAN)
     target_link_libraries(snn_core PUBLIC 
+		${CMAKE_CURRENT_SOURCE_DIR}/3rdparty/glfw/lib64/glfw3.lib
         absl_strings 
         absl_base 
         absl_flags 
