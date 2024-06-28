@@ -12,8 +12,20 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#ifndef __ANDROID__
+//#ifndef __ANDROID__
+//#include <experimental/filesystem>
+//#endif
+#if defined(HAVE_STD_FILESYSTEM)
+#include <filesystem>
+namespace fs = std::filesystem;
+#elif defined(HAVE_EXPERIMENTAL_FILESYSTEM)
 #include <experimental/filesystem>
+namespace fs = std::experimental::filesystem;
+#elif defined(HAVE_BOOST_FILESYSTEM)
+#include <boost/filesystem.hpp>
+namespace fs = boost::filesystem;
+#else
+#error "No filesystem support"
 #endif
 
 #include "matutil.h"
@@ -36,7 +48,7 @@ int main(int argc, char** argv) {
 #ifdef __ANDROID__
     std::string path = MODEL_DIR;
 #else
-    std::string path = std::experimental::filesystem::current_path();
+    std::string path = fs::current_path().string();
     path += ("/" + std::string(MODEL_DIR));
 #endif
     std::string ncnnModelName = path + formatString("/U-Net/%s", NCNN_MODEL_NAME);

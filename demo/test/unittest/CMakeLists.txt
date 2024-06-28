@@ -43,6 +43,39 @@ if (NOT DEFINED SUPPORT_GL AND NOT DEFINED SUPPORT_VULKAN)
     message(FATAL_ERROR "Neither OpenGL nor Vulkan is supported! Build the core first")
 endif()
 
+# Check for filesystem support
+include(CheckCXXSourceCompiles)
+
+check_cxx_source_compiles("
+    #include <filesystem>
+    int main() {
+        std::filesystem::path p;
+        return 0;
+    }" HAVE_STD_FILESYSTEM)
+
+check_cxx_source_compiles("
+    #include <experimental/filesystem>
+    int main() {
+        std::experimental::filesystem::path p;
+        return 0;
+    }" HAVE_EXPERIMENTAL_FILESYSTEM)
+
+find_package(Boost COMPONENTS filesystem system)
+if (Boost_FOUND)
+    set(HAVE_BOOST_FILESYSTEM 1)
+endif()
+
+if (HAVE_STD_FILESYSTEM)
+    add_definitions(-DHAVE_STD_FILESYSTEM)
+elseif (HAVE_EXPERIMENTAL_FILESYSTEM)
+    add_definitions(-DHAVE_EXPERIMENTAL_FILESYSTEM)
+elseif (HAVE_BOOST_FILESYSTEM)
+    add_definitions(-DHAVE_BOOST_FILESYSTEM)
+#else
+   # message(FATAL_ERROR "No filesystem library found")
+endif()
+
+
 if (DEFINED ENV{SNN_PROFILING})
     add_definitions( -DPROFILING )
 endif()
@@ -76,7 +109,7 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND DEFINED SUPPORT_GL)
 endif()
 
 if (MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++20")
+    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++17")
 else()
     set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -ftree-vectorize -Wno-unused-parameter -Wno-missing-braces")
 
@@ -120,7 +153,7 @@ target_include_directories(snn_common PRIVATE ${COMMON_DIR})
 
 #target_compile_options (snn_common PRIVATE -fexceptions -frtti -Wno-unused-function -Wno-sign-compare -Wno-format-extra-args -Wno-maybe-uninitialized)
 target_compile_options(snn_common PRIVATE 
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++20>
+    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++17>
     $<$<CXX_COMPILER_ID:GNU>:-fexceptions -frtti -Wno-unused-function -Wno-sign-compare -Wno-format-extra-args -Wno-maybe-uninitialized>
 )
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -146,7 +179,7 @@ macro(snn_add_test name suffix)
 
     #target_compile_options (${name}${suffix} PRIVATE -fexceptions -frtti -Wno-unused-function -Wno-sign-compare -Wno-format-extra-args -Wno-maybe-uninitialized)
 	target_compile_options(${name}${suffix} PRIVATE 
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++20>
+    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++17>
     $<$<CXX_COMPILER_ID:GNU>:-fexceptions -frtti -Wno-unused-function -Wno-sign-compare -Wno-format-extra-args -Wno-maybe-uninitialized>
 )
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
@@ -159,6 +192,12 @@ macro(snn_add_test name suffix)
         if (DEFINED SUPPORT_GL)
             target_link_libraries(${name}${suffix} PRIVATE OpenGL::EGL OpenGL::OpenGL glfw)
         endif()
+	elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
+        target_include_directories(${name}${suffix} PRIVATE ${OpenCV_INCLUDE_DIRS})
+        target_link_libraries(${name}${suffix} PRIVATE ${snn-dir}/lib/x86_64/snn_core.dll snn_common ncnn ${OpenCV_LIBS})
+        if (DEFINED SUPPORT_GL)
+            target_link_libraries(${name}${suffix} PRIVATE OpenGL::EGL OpenGL::OpenGL glfw)
+        endif()		
     elseif (DEFINED ANDROID_ABI)
         find_library(ANDROID_LOG_LIB log)
         target_include_directories(${name}${suffix} PRIVATE ${opencv-inc-dir})

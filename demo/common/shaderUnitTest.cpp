@@ -40,6 +40,24 @@
 #include "ic2/yololayer.h"
 #include "ic2/unary.h"
 
+#if defined(_WIN32)
+#include <windows.h>
+#define CLOCK_MONOTONIC 1
+
+int clock_gettime(int /*clk_id*/, struct timespec* ts) {
+    FILETIME ft;
+    ULARGE_INTEGER li;
+    GetSystemTimeAsFileTime(&ft);
+    li.LowPart = ft.dwLowDateTime;
+    li.HighPart = ft.dwHighDateTime;
+    // Windows file time is in 100 nanoseconds resolution
+    ts->tv_sec = li.QuadPart / 10000000UL - 11644473600UL; // Convert to seconds
+    ts->tv_nsec = (li.QuadPart % 10000000UL) * 100; // Convert to nanoseconds
+    return 0;
+}
+
+#endif
+
 #define NEW_LAYER(layer, desc) \
     std::shared_ptr<snn::dp::GenericModelLayer>(snn::dp::layer##Creator1(std::move(desc), useVulkan()));
 

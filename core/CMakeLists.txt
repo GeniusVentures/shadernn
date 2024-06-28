@@ -518,6 +518,8 @@ install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src DESTINATION ${root-dir}/snn-co
 
 if (DEFINED ANDROID_ABI)
     install(FILES ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsnn_core.so DESTINATION ${root-dir}/snn-core-install/lib/${ANDROID_ABI})
-else()
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(FILES ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsnn_core.so DESTINATION ${root-dir}/snn-core-install/lib/linux_x86_64/)
+elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
+	install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/snn_core.dll DESTINATION ${root-dir}/snn-core-install/lib/x86_64)
 endif()

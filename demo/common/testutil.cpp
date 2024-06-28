@@ -31,6 +31,9 @@
 #include <math.h>
 #include <stdio.h>
 #include <stdlib.h>
+#ifdef max
+#undef max
+#endif
 
 #if NCNN_VULKAN
     #include "command.h"
