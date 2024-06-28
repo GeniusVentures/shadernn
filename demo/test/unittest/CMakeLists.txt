@@ -19,6 +19,9 @@ set(CMAKE_CXX_STANDARD 17)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(CMAKE_C_FLAGS "/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722")
+set(CMAKE_CXX_FLAGS "/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722")
+
 set(snn-dir ${CMAKE_CURRENT_SOURCE_DIR}/../../../snn-core-install)
 
 set(config_file "${snn-dir}/config.txt")
@@ -108,15 +111,15 @@ if (CMAKE_SYSTEM_NAME STREQUAL "Linux" AND DEFINED SUPPORT_GL)
     find_package(OpenGL REQUIRED)
 endif()
 
-if (MSVC)
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++17")
-else()
-    set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -ftree-vectorize -Wno-unused-parameter -Wno-missing-braces")
+# if (MSVC)
+    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} /W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++17")
+# else()
+    # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wall -Werror -ftree-vectorize -Wno-unused-parameter -Wno-missing-braces")
 
-    if (DEFINED ANDROID_ABI)
-        set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-self-assign -Wnon-pod-varargs")
-    endif()
-endif()
+    # if (DEFINED ANDROID_ABI)
+        # set(CMAKE_CXX_FLAGS "${CMAKE_CXX_FLAGS} -Wno-self-assign -Wnon-pod-varargs")
+    # endif()
+# endif()
 
 set(3rdparty-dir ${CMAKE_CURRENT_SOURCE_DIR}/../../../core/3rdparty)
 
@@ -152,10 +155,10 @@ target_include_directories(snn_common PRIVATE ${snn-dir}/includes/src)
 target_include_directories(snn_common PRIVATE ${COMMON_DIR})
 
 #target_compile_options (snn_common PRIVATE -fexceptions -frtti -Wno-unused-function -Wno-sign-compare -Wno-format-extra-args -Wno-maybe-uninitialized)
-target_compile_options(snn_common PRIVATE 
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++17>
-    $<$<CXX_COMPILER_ID:GNU>:-fexceptions -frtti -Wno-unused-function -Wno-sign-compare -Wno-format-extra-args -Wno-maybe-uninitialized>
-)
+# target_compile_options(snn_common PRIVATE 
+    # $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++17>
+    # $<$<CXX_COMPILER_ID:GNU>:-fexceptions -frtti -Wno-unused-function -Wno-sign-compare -Wno-format-extra-args -Wno-maybe-uninitialized>
+# )
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_options(snn_common PRIVATE -D_DEBUG -g)
 endif()
@@ -178,10 +181,10 @@ macro(snn_add_test name suffix)
     target_include_directories(${name}${suffix} PRIVATE ${COMMON_DIR})
 
     #target_compile_options (${name}${suffix} PRIVATE -fexceptions -frtti -Wno-unused-function -Wno-sign-compare -Wno-format-extra-args -Wno-maybe-uninitialized)
-	target_compile_options(${name}${suffix} PRIVATE 
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++17>
-    $<$<CXX_COMPILER_ID:GNU>:-fexceptions -frtti -Wno-unused-function -Wno-sign-compare -Wno-format-extra-args -Wno-maybe-uninitialized>
-)
+	# target_compile_options(${name}${suffix} PRIVATE 
+    # $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++17>
+    # $<$<CXX_COMPILER_ID:GNU>:-fexceptions -frtti -Wno-unused-function -Wno-sign-compare -Wno-format-extra-args -Wno-maybe-uninitialized>
+# )
     if (CMAKE_BUILD_TYPE STREQUAL "Debug")
         target_compile_options(${name}${suffix} PRIVATE -D_DEBUG -g)
     endif()
@@ -194,7 +197,7 @@ macro(snn_add_test name suffix)
         endif()
 	elseif (CMAKE_SYSTEM_NAME STREQUAL "Windows")
         target_include_directories(${name}${suffix} PRIVATE ${OpenCV_INCLUDE_DIRS})
-        target_link_libraries(${name}${suffix} PRIVATE ${snn-dir}/lib/x86_64/snn_core.dll snn_common ncnn ${OpenCV_LIBS})
+        target_link_libraries(${name}${suffix} PRIVATE ${snn-dir}/lib/x86_64/snn_core.lib snn_common ncnn ${OpenCV_LIBS})
         if (DEFINED SUPPORT_GL)
             target_link_libraries(${name}${suffix} PRIVATE OpenGL::EGL OpenGL::OpenGL glfw)
         endif()		

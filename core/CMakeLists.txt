@@ -15,10 +15,12 @@
 cmake_minimum_required(VERSION 3.9)
 
 project(snn_core)
-set(CMAKE_CXX_STANDARD 17)
+set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
+set(CMAKE_C_FLAGS "/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722")
+set(CMAKE_CXX_FLAGS "/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722")
 
 option(SUPPORT_VULKAN "Enable Vulkan support" OFF)
 option(SUPPORT_GL "Enable OpenGL support" OFF)
@@ -289,7 +291,7 @@ if (DEFINED SUPPORT_VULKAN)
     message(STATUS, ${outVar})
 endif() # SUPPORT_VULKAN
 
-add_library(snn_core SHARED ${sources} ${public_headers} ${snn_3rdparty_sources})
+add_library(snn_core STATIC ${sources} ${public_headers} ${snn_3rdparty_sources})
 
 if (SUPPORT_VULKAN)
     target_compile_definitions(snn_core PRIVATE SUPPORT_VULKAN)
@@ -299,10 +301,10 @@ if (SUPPORT_GL)
     target_compile_definitions(snn_core PRIVATE SUPPORT_GL)
 endif()
 
-target_compile_options(snn_core PUBLIC 
-    $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /std:c++20>
-    $<$<CXX_COMPILER_ID:GNU>:-fPIC -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-private-field -Wno-sign-compare>
-)
+# target_compile_options(snn_core PUBLIC 
+    # $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722>
+    # $<$<CXX_COMPILER_ID:GNU>:-fPIC -Wall -Wextra -Werror -Wno-unused-function -Wno-unused-private-field -Wno-sign-compare>
+# )
 # Eliminating picojson compile error
 if (MSVC)
     # Define the MSVC-specific flags
@@ -339,6 +341,7 @@ if (DEFINED ANDROID_ABI)
                                     ${opencv-lib-dir}/libopencv_core.so 
                                     ${opencv-lib-dir}/libopencv_imgproc.so
                                     ${opencv-lib-dir}/libopencv_video.so)
+	target_link_options(your_target PRIVATE "/NODEFAULTLIB:MSVCRT")
     if (DEFINED SUPPORT_GL)
         target_link_libraries(snn_core PUBLIC EGL GLESv2 GLESv3)
     endif()
@@ -440,7 +443,12 @@ else()
         )
     endif()
     cmrc_add_resource_library(snn-assets ALIAS snn::rc NAMESPACE snn ${assets})
-    target_compile_options(snn-assets PRIVATE -fPIC)
+    #target_compile_options(snn-assets PRIVATE -fPIC)
+
+	# target_compile_options(snn-assets PUBLIC 
+    # $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 >
+    # $<$<CXX_COMPILER_ID:GNU>:-fPIC>
+# )
     target_include_directories(snn_core PUBLIC ${OpenCV_INCLUDE_DIRS})
     if (CMAKE_CXX_COMPILER_ID STREQUAL "GNU" OR CMAKE_CXX_COMPILER_ID STREQUAL "Clang")
 		target_link_libraries(snn_core PUBLIC stdc++fs)
@@ -521,5 +529,5 @@ if (DEFINED ANDROID_ABI)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Linux")
     install(FILES ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsnn_core.so DESTINATION ${root-dir}/snn-core-install/lib/linux_x86_64/)
 elseif(CMAKE_SYSTEM_NAME STREQUAL "Windows")
-	install(FILES ${CMAKE_RUNTIME_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/snn_core.dll DESTINATION ${root-dir}/snn-core-install/lib/x86_64)
+	install(FILES ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/${CMAKE_BUILD_TYPE}/snn_core.lib DESTINATION ${root-dir}/snn-core-install/lib/x86_64)
 endif()
