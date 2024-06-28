@@ -514,7 +514,7 @@ endif()
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/inc DESTINATION ${root-dir}/snn-core-install/includes/)
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src DESTINATION ${root-dir}/snn-core-install/includes/ FILES_MATCHING PATTERN "*.h")
 install(DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/src DESTINATION ${root-dir}/snn-core-install/includes/ FILES_MATCHING PATTERN "*.hpp")
-install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/config.txt DESTINATION ${root-dir}/snn-core-install)
+#install(FILES ${CMAKE_CURRENT_SOURCE_DIR}/config.txt DESTINATION ${root-dir}/snn-core-install)
 
 if (DEFINED ANDROID_ABI)
     install(FILES ${CMAKE_LIBRARY_OUTPUT_DIRECTORY}/libsnn_core.so DESTINATION ${root-dir}/snn-core-install/lib/${ANDROID_ABI})

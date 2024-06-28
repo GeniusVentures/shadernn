@@ -105,9 +105,13 @@ set(snn_3rdparty_headers
 if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
     link_directories(${snn-dir}/lib/linux_x86_64/lib ${ncnn_DIR})
 endif()
+include_directories(${Vulkan_INCLUDE_DIR})
+include_directories(${CMAKE_CURRENT_SOURCE_DIR}/../../../../ncnn/src)
+include_directories(${NCNN_ROOT_DIR}/include/ncnn)
 
 add_library(snn_common STATIC ${SRC_COMMON})
-target_include_directories(snn_common PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../ncnn-20211208/src)
+target_include_directories(snn_common PRIVATE ${CMAKE_CURRENT_SOURCE_DIR}/../../../../ncnn/src)
+message("NCNN SRC ${CMAKE_CURRENT_SOURCE_DIR}/../../../ncnn/src")
 target_include_directories(snn_common PRIVATE ${NCNN_ROOT_DIR}/include/ncnn)
 target_include_directories(snn_common PRIVATE ${snn_3rdparty_headers})
 target_include_directories(snn_common PRIVATE ${snn-dir}/includes/inc)
@@ -122,11 +126,12 @@ target_compile_options(snn_common PRIVATE
 if (CMAKE_BUILD_TYPE STREQUAL "Debug")
     target_compile_options(snn_common PRIVATE -D_DEBUG -g)
 endif()
-
-if (CMAKE_SYSTEM_NAME STREQUAL "Linux")
-    target_include_directories(snn_common PRIVATE ${OpenCV_INCLUDE_DIRS})
-elseif (DEFINED ANDROID_ABI)
+ 
+if (DEFINED ANDROID_ABI)
     target_include_directories(snn_common PRIVATE ${opencv-inc-dir})
+else()
+	target_include_directories(snn_common PRIVATE ${OpenCV_INCLUDE_DIRS})
+	include_directories(${OpenCV_INCLUDE_DIRS})
 endif()
 
 macro(snn_add_test name suffix)
