@@ -19,8 +19,8 @@ set(CMAKE_CXX_STANDARD 20)
 set(CMAKE_CXX_STANDARD_REQUIRED ON)
 set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
-set(CMAKE_C_FLAGS "/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722")
-set(CMAKE_CXX_FLAGS "/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722")
+set(CMAKE_C_FLAGS "/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /EHsc")
+set(CMAKE_CXX_FLAGS "/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 /EHsc")
 
 option(SUPPORT_VULKAN "Enable Vulkan support" OFF)
 option(SUPPORT_GL "Enable OpenGL support" OFF)
@@ -291,7 +291,7 @@ if (DEFINED SUPPORT_VULKAN)
     message(STATUS, ${outVar})
 endif() # SUPPORT_VULKAN
 
-add_library(snn_core STATIC ${sources} ${public_headers} ${snn_3rdparty_sources})
+add_library(snn_core SHARED ${sources} ${public_headers} ${snn_3rdparty_sources})
 
 if (SUPPORT_VULKAN)
     target_compile_definitions(snn_core PRIVATE SUPPORT_VULKAN)
@@ -341,7 +341,7 @@ if (DEFINED ANDROID_ABI)
                                     ${opencv-lib-dir}/libopencv_core.so 
                                     ${opencv-lib-dir}/libopencv_imgproc.so
                                     ${opencv-lib-dir}/libopencv_video.so)
-	target_link_options(your_target PRIVATE "/NODEFAULTLIB:MSVCRT")
+	target_link_options(snn_core PRIVATE "/NODEFAULTLIB:MSVCRT")
     if (DEFINED SUPPORT_GL)
         target_link_libraries(snn_core PUBLIC EGL GLESv2 GLESv3)
     endif()
@@ -444,7 +444,7 @@ else()
     endif()
     cmrc_add_resource_library(snn-assets ALIAS snn::rc NAMESPACE snn ${assets})
     #target_compile_options(snn-assets PRIVATE -fPIC)
-
+	target_link_options(snn-assets PRIVATE "/NODEFAULTLIB:MSVCRT")
 	# target_compile_options(snn-assets PUBLIC 
     # $<$<CXX_COMPILER_ID:MSVC>:/W4 /WX- /D_CRT_SECURE_NO_WARNINGS /D_SCL_SECURE_NO_WARNINGS /D_CRT_NONSTDC_NO_DEPRECATE /D_ENABLE_EXTENDED_ALIGNED_STORAGE /wd4267 /wd4244 /wd4146 /wd4722 >
     # $<$<CXX_COMPILER_ID:GNU>:-fPIC>
